@@ -110,4 +110,4 @@ async def sc0000001(ctx):
 	embed = discord.Embed(color = 0x537cda, description = f"Секретная команда", title = 'Секретная команда')
 	await ctx.send(embed = embed)
 
-bot.run('Nzc0NjQ2MTg3NDQwODY1Mjkw.X6azew.bFWlgkQ68W7sTFfT8PA-InZkG0I')
+bot.run('TOKEN')
