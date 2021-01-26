@@ -9,7 +9,9 @@ bot = discord.ext.commands.Bot(command_prefix = "!")
 # Power
 @bot.event
 async def on_ready():
-    print('I am power')# Допилить
+    activity = discord.Game(name="!help", type=3)
+    await bot.change_presence(status=discord.Status.online, activity=activity)
+    print("Bot is ready!")
 
 # INFORMATION
 
