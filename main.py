@@ -88,7 +88,7 @@ async def chelp(ctx, command):
 # Bot info
 @bot.command()
 async def bot_info(ctx):
-	embed = discord.Embed(title = 'Обо мне', color = 0x326cfc, description = f"Мой репозиторий на Git Hub:\n`https://github.com/Innokentie/ours-bot`.")
+	embed = discord.Embed(title = 'Обо мне', color = 0x326cfc, description = f"Мой репозиторий на GitHub:\n`https://github.com/Innokentie/ours-bot`.")
 	embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/774646187440865290/643380e6d2dd7bbbe0aaae4c2815382c.png?size=256")
 	embed.set_footer(text = "Innokentie12")
 	await ctx.send(embed = embed)
