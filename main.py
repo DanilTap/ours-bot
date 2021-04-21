@@ -16,7 +16,6 @@ async def on_ready():
 
 
 # INFORMATION
-
 # Help
 bot.remove_command('help')
 @bot.command()
@@ -194,11 +193,57 @@ async def sendmember(ctx, member: discord.Member, *, text):
 async def sendchannel(ctx, channel: int, *, text):
 	channelm = bot.get_channel(channel)
 	await channelm.send(f'{text}')
-	embed = discord.Embed(color = 0x326cfc, description = f"{ctx.message.author.name} Ваше сообщение было доставлено.",)
+	embed = discord.Embed(color = 0x326cfc, description = f"{ctx.message.author.name} Ваше сообщение было доставлено.")
 	await ctx.send(embed = embed)
 
 
 # ALSO
+# List
+darray = ['Hello', 'Good day']
+
+@bot.command()
+async def arrday(ctx, command):
+	pass
+
+
+@bot.command()
+async def array(ctx, command = None, *, add = None):
+	global darray
+
+	if command == None and add == None or command == "see" or command == "look":
+		await ctx.send(f'`{darray}`')
+
+	elif command == "add":
+		darray.append(f'{add}')
+		await ctx.message.add_reaction('✅')
+
+	elif command == "clear":
+		darray.clear()
+		await ctx.message.add_reaction('✅')
+
+	else:
+		await ctx.send(f'Команды `{command}` не существует!')
+
+
+# Commode
+def commodestart():
+	@bot.event
+	async def on_message(message):
+		if message.author == bot.user:
+			return
+
+		elif message.content == "commode stop":
+			quit()
+
+		else:
+			channel = bot.get_channel(809274410049339452)
+			await channel.send(f"Сообщение от {message.author.name}:\n**```\n{message.content}\n```**")
+			await bot.process_commands(message)
+
+@bot.command()
+async def commode(ctx):
+		await ctx.send("Done")
+		commodestart()
 
 # Print
 @bot.command()
@@ -226,7 +271,6 @@ async def embedc(ctx, color: discord.Colour, title, *, des):
 	embed = discord.Embed(title = f'{title}', color = color, description = f"{des}")
 	await ctx.send(embed = embed)
 
-
 # Set stats
 @bot.command()
 async def setstats(ctx, *, stats: str):
@@ -237,15 +281,10 @@ async def setstats(ctx, *, stats: str):
 	activity = discord.Game(name="!help", type=3)
 	await bot.change_presence(status=discord.Status.online, activity=activity)
 
-
 # Hello
 @bot.command()
 async def hello(ctx):
-    await ctx.send(f'{ctx.message.author.mention}, Привет!')
+	await ctx.send(f'{ctx.message.author.mention}, Привет!')
 
 
-# SECRET
-
-# You hacker
-
-bot.run('token_HaCkEr')
+bot.run('token')
