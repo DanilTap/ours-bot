@@ -4,4 +4,4 @@ This Discord bot was created for the programming community **Programming | PySid
 
 You can use some of the code for yourself.
 
-For questions contact me HTTPS#3112 in Discord.
+For questions contact me HTTPs#3112 in Discord.
