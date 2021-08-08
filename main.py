@@ -20,7 +20,7 @@ async def on_ready():
 bot.remove_command('help')
 @bot.command()
 async def help(ctx):
-	embed = discord.Embed(title = 'Команды:', color = 0x326cfc, description = f"\n**Информация**\n`!help` `!chelp` `!bot_info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute` `!warn`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`!randid` `!randnum` `!setstats`\n`!print` `!hello`\n\nСекретные: `1`")
+	embed = discord.Embed(title = 'Команды:', color = 0x326cfc, description = f"\n**Информация**\n`!help` `!chelp` `!bot_info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute` `!warn`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`embedc` `!randid` `!randnum` `!setstats`\n`!print` `!hello`\n\nСекретные: `1`")
 	embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/809274410049339452/816321656238768219/Screenshot_4.png")
 	embed.set_footer(text="15 команд | Подробнее о командах - !chelp <команда без !>")
 	await ctx.send(embed = embed)
@@ -78,6 +78,14 @@ async def chelp(ctx, command):
 
 	elif command == 'hello':
 		embed = discord.Embed(title = '!hello', color = 0x326cfc, description = f"Синтаксис:\n`!hello`\n:)")
+		await ctx.send(embed = embed)
+		
+	elif command == 'embedc':
+		embed = discord.Embed(title = '!embedc', color = 0x326cfc, description = f"Синтаксис:\n`!embedc <Цвет> <Заголовок(title)> <Текст(description)>`\nСгенерирует Discord Embed по указанным аргументам и выдаст его код на discord.py.")
+		await ctx.send(embed = embed)
+		
+	elif command == 'bot_info':
+		embed = discord.Embed(title = '!bot_info', color = 0x326cfc, description = f"Синтаксис:\n`!bot_info`\n:)")
 		await ctx.send(embed = embed)
 
 	else:
