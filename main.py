@@ -4,10 +4,14 @@ from discord.ext import commands
 import asyncio
 import uuid
 import random
+import json
 
-bot = discord.ext.commands.Bot(command_prefix = "!")
+intents = discord.Intents.default()
+intents.members = True
+bot = discord.ext.commands.Bot(command_prefix = "!", intents = intents)
 
-# Power
+# EVENTS
+# Start
 @bot.event
 async def on_ready():
 	print("Bot is ready!")
@@ -15,185 +19,223 @@ async def on_ready():
 	await bot.change_presence(status=discord.Status.online, activity=activity)
 
 
-# INFORMATION
+# Welcome
+@bot.event
+async def on_member_join(member):
+	channel = bot.get_channel(898104718293884988)
+	await channel.send(f'**{member.mention}, Добро пожаловать на сервер Programming | PySider | RU! :wave:**\nРекомендуем ознакомиться с основной информацией о сервере в канале <#898105144372244501>, а также с правилами сервера - <#779376759065411624>.\n\n<@677453905227022349>')
+
+# Buy
+@bot.event
+async def on_member_remove(member):
+	channel = bot.get_channel(898104747322642472)
+	await channel.send(f'Наш сервер покидает `{member}`.\n\n<@677453905227022349>')
+
+# Get roles
+@bot.event
+async def on_raw_reaction_add(payload):
+	guild = bot.get_guild(payload.guild_id)
+	member_id = payload.user_id
+	member = guild.get_member(member_id)
+	message_id = payload.message_id
+
+	if payload.user_id == bot.user.id:
+		return
+
+	if message_id == 898159645380714545:
+		if payload.emoji.name == "🔃":
+			getrole = discord.utils.get(guild.roles, id = 790690635329962075)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🥘":
+			getrole = discord.utils.get(guild.roles, id = 898160482073079808)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🐍":
+			getrole = discord.utils.get(guild.roles, id = 790690334447108137)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🇯":
+			getrole = discord.utils.get(guild.roles, id = 790690520733188196)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "👶":
+			getrole = discord.utils.get(guild.roles, id = 800013291853709332)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "💵":
+			getrole = discord.utils.get(guild.roles, id = 800413130244096033)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🧱":
+			getrole = discord.utils.get(guild.roles, id = 800410934404710421)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🅿️":
+			getrole = discord.utils.get(guild.roles, id = 790690860873809920)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🧮":
+			getrole = discord.utils.get(guild.roles, id = 855392977555947530)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🥖":
+			getrole = discord.utils.get(guild.roles, id = 798881583850455091)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🥔":
+			getrole = discord.utils.get(guild.roles, id = 798881351611711502)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🎞️":
+			getrole = discord.utils.get(guild.roles, id = 800408491297996840)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "📷":
+			getrole = discord.utils.get(guild.roles, id = 790691619971792896)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🐟":
+			getrole = discord.utils.get(guild.roles, id = 790691478070493244)
+			await member.add_roles(getrole)
+
+		elif payload.emoji.name == "🖥️":
+			getrole = discord.utils.get(guild.roles, id = 790691158216278016)
+			await member.add_roles(getrole)
+
+
+
+# METHODS
+
+
+
+
+# COMMANDS
+# Information
 # Help
 bot.remove_command('help')
 @bot.command()
-async def help(ctx):
-	embed = discord.Embed(title = 'Команды:', color = 0x326cfc, description = f"\n**Информация**\n`!help` `!chelp` `!bot_info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute` `!warn`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`embedc` `!randid` `!randnum` `!setstats`\n`!print` `!hello`\n\nСекретные: `1`")
-	embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/809274410049339452/816321656238768219/Screenshot_4.png")
-	embed.set_footer(text="15 команд | Подробнее о командах - !chelp <команда без !>")
-	await ctx.send(embed = embed)
+async def help(ctx, command=None):
+	if command == None:
+		embed = discord.Embed(title = 'Мои команды:', color = 0x326cfc, description = "\n**Информация**\n`!help` `!info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`!embedc` `!randid` `!randnum` `!setstats`\n`!print` `!hello`\n\n*Секретные: `1`*")
+		embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/809274410049339452/816321656238768219/Screenshot_4.png")
+		embed.set_footer(text="17 команд | Подробнее о командах - !help <команда>")
+		await ctx.send(embed = embed)
 
-# Chelp
+	elif command != None:
+		embed = discord.Embed()
+
+		if command == "help" or command == "!help":
+			embed = discord.Embed(title = '!help <команда>', color = 0x326cfc, description = "Используйте эту команду с аргументом в виде названия команды для получения подробной информации о ней.")
+
+		elif command == "!info" or command == "!info":
+			embed = discord.Embed(title = '!info', color = 0x326cfc, description = "Краткая информация о боте.")
+
+		elif command == "ban" or command == "!ban":
+			embed = discord.Embed(title = '!ban <Участник> <Причина>', color = 0x326cfc, description = "Бан участника на сервере")
+
+		elif command == "unban" or command == "!unban":
+			embed = discord.Embed(title = '!unban', color = 0x326cfc, description = "Разбан участника на сервере")
+
+		elif command == "mute" or command == "!mute":
+			embed = discord.Embed(title = '!mute <Участник> <Время(мин)> <Причина>', color = 0x326cfc, description = "Мьют участника на сервере, блокировка доступа к текстовым каналом и последующее ее снятие по окончанию времени мьюта.")
+
+		elif command == "unmute" or command == "!unmute":
+			embed = discord.Embed(title = '!unmute', color = 0x326cfc, description = "Снятие мьюта с участника.")
+
+		elif command == "kick" or command == "!kick":
+			embed = discord.Embed(title = '!kick <Участник> <Причина>', color = 0x326cfc, description = "Кик участника с сервера.")
+
+		elif command == "sendmember" or command == "!sendmember":
+			embed = discord.Embed(title = '!sendmember', color = 0x326cfc, description = "")
+
+		elif command == "sendchannel" or command == "!sendchannel":
+			embed = discord.Embed(title = '!sendchannel', color = 0x326cfc, description = "")
+
+		elif command == "embedc" or command == "!embedc":
+			embed = discord.Embed(title = '!embedc <Цвет(HEX)> <Заголовок> <Текст>', color = 0x326cfc, description = "Создание простого Discord embed для discord.py с указанными аргументами.")
+
+		elif command == "setstats" or command == "!setstats":
+			embed = discord.Embed(title = '!setstats <Текст>', color = 0x326cfc, description = "Смена статуса бота на 120 секунд.")
+
+		elif command == "randid" or command == "!randid":
+			embed = discord.Embed(title = '!randid', color = 0x326cfc, description = "Генерация случайного ID.")
+
+		elif command == "randnum" or command == "!randnum":
+			embed = discord.Embed(title = '!randnum <От> <До>', color = 0x326cfc, description = "Генерация случайного числа.")
+
+		elif command == "print" or command == "!print":
+			embed = discord.Embed(title = '!print <Текст>', color = 0x326cfc, description = "Отправка текста ботом.")
+
+		elif command == "hello" or command == "!hello":
+			embed = discord.Embed(title = '!hello', color = 0x326cfc, description = "Здравствуйте!")
+
+		elif command == "array" or command == "!array":
+			embed = discord.Embed(title = '!array <Действие> || <Параметры>', color = 0x326cfc, description = "Работа с пользовательским массивом.\n\n**Аргументы**\nКоманда без аргументов выводит весь массив\n`add` - Добавляет элемент в массив.\n`pop <индекс>` - Удаление элемента с индексом n\n`clear` - Очистка массива.\n`max` - Сортировка массива по длинне или размеру числа.")
+
+		else:
+			embed = "Команда не была найдена."
+
+		await ctx.send(embed = embed)
+
+# Info
 @bot.command()
-async def chelp(ctx, command):
-	if command == 'ban':
-		embed = discord.Embed(title = '!ban', color = 0x326cfc, description = f"Синтаксис:\n`!ban <Участник | @Участник | ID> <Причина>`\nЗабанит участника на сервере.")
-		await ctx.send(embed = embed)
-
-	if command == 'unban':
-		embed = discord.Embed(title = '!unban', color = 0x326cfc, description = f"Синтаксис:\n`!unban <Участник | @Участник | ID>`\nРазбанит участника на сервере.")
-		await ctx.send(embed = embed)
-
-	elif command == 'kick':
-		embed = discord.Embed(title = '!kick', color = 0x326cfc, description = f"Синтаксис:\n`!kick <Участник | @Участник | ID> <Причина>`\nВыгонит участника с сервера.")
-		await ctx.send(embed = embed)
-
-	elif command == 'mute':
-		embed = discord.Embed(title = '!mute', color = 0x326cfc, description = f"Синтаксис:\n`!mute <Участник | @Участник | ID> <Время в минутах> <Причина>`\nЗапретит участнику писать в каналах(выдаст роль MUTED).")
-		await ctx.send(embed = embed)
-
-	elif command == 'unmute':
-		embed = discord.Embed(title = '!unmute', color = 0x326cfc, description = f"Синтаксис:\n`!unmute <Участник | @Участник | ID>`\nРазмьютит участника.")
-		await ctx.send(embed = embed)
-
-	elif command == 'warn':
-		embed = discord.Embed(title = '!warn', color = 0x326cfc, description = f"Синтаксис:\n`!warn <Участник | @Участник | ID> <Причина>`\nВыдаст предупреждение участнику(Сообщение в чате).")
-		await ctx.send(embed = embed)
-
-	elif command == 'sendmember':
-		embed = discord.Embed(title = '!sendmember', color = 0x326cfc, description = f"Синтаксис:\n`!sendmember <Участник | @Участник | ID> <Сообщение>`\nОтправит сообщение участнику в личный чат(только для модерации).")
-		await ctx.send(embed = embed)
-
-	elif command == 'sendchannel':
-		embed = discord.Embed(title = '!sendchannel', color = 0x326cfc, description = f"Синтаксис:\n`!sendchannel <Канал | @Канал | ID> <Сообщение>`\nОтправит сообщение в указаный канал(только для модерации).")
-		await ctx.send(embed = embed)
-
-	elif command == 'chelp':
-		embed = discord.Embed(title = 'Гениально', color = 0x326cfc)
-		await ctx.send(embed = embed)
-
-	elif command == 'randnum':
-		embed = discord.Embed(title = '!randnum', color = 0x326cfc, description = f"Синтаксис:\n`!randnum <От> <До>`\nОтправит случайное число от первого и второго указанных.")
-		await ctx.send(embed = embed)
-
-	elif command == 'randid':
-		embed = discord.Embed(title = '!randid', color = 0x326cfc, description = f"Синтаксис:\n`!randid`\nСгенерирует случайный id в 128 бит.")
-		await ctx.send(embed = embed)
-
-	elif command == 'setstats':
-		embed = discord.Embed(title = '!setstats', color = 0x326cfc, description = f"Синтаксис:\n`!setstats <Статус>`\nСменит статус бота.")
-		await ctx.send(embed = embed)
-
-	elif command == 'hello':
-		embed = discord.Embed(title = '!hello', color = 0x326cfc, description = f"Синтаксис:\n`!hello`\n:)")
-		await ctx.send(embed = embed)
-		
-	elif command == 'embedc':
-		embed = discord.Embed(title = '!embedc', color = 0x326cfc, description = f"Синтаксис:\n`!embedc <Цвет> <Заголовок(title)> <Текст(description)>`\nСгенерирует Discord Embed по указанным аргументам и выдаст его код на discord.py.")
-		await ctx.send(embed = embed)
-		
-	elif command == 'bot_info':
-		embed = discord.Embed(title = '!bot_info', color = 0x326cfc, description = f"Синтаксис:\n`!bot_info`\n:)")
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0x326cfc, description = f"Такой команды не существует.")
-		await ctx.send(embed = embed)
-
-# Bot info
-@bot.command()
-async def bot_info(ctx):
-	embed = discord.Embed(title = 'Обо мне', color = 0x326cfc, description = f"Мой репозиторий на GitHub:\n`https://github.com/Innokentie/ours-bot`.")
+async def info(ctx):
+	embed = discord.Embed(title = 'Обо мне', color = 0x326cfc, description = f"Подробную информацию обо мне можно получить [здесь](https://discord.com/channels/775520099112189974/782877918208065596/898092325400641546).\n\nМой репозиторий на GitHub:\n`https://github.com/Innokentie/ours-bot`.")
 	embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/774646187440865290/643380e6d2dd7bbbe0aaae4c2815382c.png?size=256")
-	embed.set_footer(text = "Innokentie12")
+	embed.set_footer(text = "HTTPs")
 	await ctx.send(embed = embed)
 
 
-# MODERATION
-
+# Moderation
 # Ban
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def ban(ctx, member: discord.Member, *, about: str):
-	if member:
-		await member.ban()
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был забанен **{ctx.message.author.name}** по причине:\n**```\n{about}\n```**')
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
+	await member.ban()
+	await ctx.message.add_reaction('✅')
 
 # Unban
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def unban(ctx, member: discord.Member, *, about: str):
-	if member:
-		await member.unban()
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был разбанен **{ctx.message.author.name}** по причине:\n**```\n{about}\n```**')
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
+	await member.unban()
+	await ctx.message.add_reaction('✅')
 
 # Kick
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def kick(ctx, member: discord.Member, *, about: str):
-	if member:
-		await member.kick()
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был кикнут **{ctx.message.author.name}** по причине:\n**```\n{about}\n```**')
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
+	await member.kick()
+	await ctx.message.add_reaction('✅')
 
 # Mute
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def mute(ctx, member: discord.Member, time: int, *, about: str):
-	if member:
-		getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
-		await member.add_roles(getrole)
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был замьючен **{ctx.message.author.name}** на {time} минут по причине:\n**```\n{about}\n```**')
-		await ctx.send(embed = embed)
-		await asyncio.sleep(time*60)
-		await member.remove_roles(getrole)
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был размьючен спустя {time} минут')
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
+	getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
+	await member.add_roles(getrole)
+	await ctx.message.add_reaction('✅')
+	await asyncio.sleep(time*60)
+	await member.remove_roles(getrole)
+	embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был размьючен спустя {time} минут')
+	await ctx.send(embed = embed)
 
 # Unmute
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def unmute(ctx, member: discord.Member):
-	if member:
-		getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
-		await member.remove_roles(getrole)
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был размьючен **{ctx.message.author.name}**.')
-		await ctx.send(embed = embed)
+	getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
+	await member.remove_roles(getrole)
+	await ctx.message.add_reaction('✅')
 
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
-
-# Warn
-@bot.command()
-@commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def warn(ctx, member: discord.Member, *, about: str):
-	if member:
-		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** получил предупреждение от **{ctx.message.author.name}** по причине:\n**```\n{about}\n```**')
-		await ctx.send(embed = embed)
-
-	else:
-		embed = discord.Embed(color = 0xed0c0c, description = 'Ошибка в аргументах команды\nили участник не найден.', title = 'Ошибка')
-		await ctx.send(embed = embed)
 
 # Member send
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def sendmember(ctx, member: discord.Member, *, text):
-	embed = discord.Embed(color = 0x326cfc, description = f"{text}")
-	await member.send(embed = embed)
-	embed = discord.Embed(color = 0x326cfc, description = f"{ctx.message.author.name} Ваше сообщение было доставлено участнику {member.name}.",)
-	await ctx.send(embed = embed)
+	await member.send()
+	await ctx.message.add_reaction('✅')
 
 # Channel send
 @bot.command()
@@ -201,57 +243,52 @@ async def sendmember(ctx, member: discord.Member, *, text):
 async def sendchannel(ctx, channel: int, *, text):
 	channelm = bot.get_channel(channel)
 	await channelm.send(f'{text}')
-	embed = discord.Embed(color = 0x326cfc, description = f"{ctx.message.author.name} Ваше сообщение было доставлено.")
-	await ctx.send(embed = embed)
+	await ctx.message.add_reaction('✅')
 
 
-# ALSO
-# List
-darray = ['Hello', 'Good day']
+# Other
+# Create role
+@bot.command()
+async def get_role(ctx, *, name):
+	if ctx.channel.id == 782905071473393694:
+		role = await ctx.guild.create_role(name=str(name))
+		getrole = discord.utils.get(ctx.guild.roles, id = role.id)
+		await ctx.message.author.add_roles(getrole)
+		await ctx.message.add_reaction('✅')
+		await asyncio.sleep(1.5)
+		await ctx.channel.purge(limit=1)
+
+	else:
+		await ctx.send('Эту команду можно использовать только <#782905071473393694>')
 
 @bot.command()
-async def arrday(ctx, command):
-	pass
+async def array(ctx, command = None, *, parametr = None):
+	with open('bot_constants.json','r', encoding='utf-8') as f:
+		const = json.load(f)
 
+	array = const["list"]
 
-@bot.command()
-async def array(ctx, command = None, *, add = None):
-	global darray
-
-	if command == None and add == None or command == "see" or command == "look":
-		await ctx.send(f'`{darray}`')
+	if command == None and parametr == None or command == "see" or command == "look":
+		await ctx.send(f'`{array}`')
 
 	elif command == "add":
-		darray.append(f'{add}')
+		const["list"].append(f'{parametr}')
+		await ctx.message.add_reaction('✅')
+
+	elif command == "pop":
+		const["list"].pop(int(parametr))
 		await ctx.message.add_reaction('✅')
 
 	elif command == "clear":
-		darray.clear()
+		const["list"] = []
 		await ctx.message.add_reaction('✅')
 
 	else:
-		await ctx.send(f'Команды `{command}` не существует!')
+		await ctx.send(f'Указан неверный параметр, спотрите `!help array`')
 
+	with open('bot_constants.json','w') as f:
+		json.dump(const,f)
 
-# Commode
-def commodestart():
-	@bot.event
-	async def on_message(message):
-		if message.author == bot.user:
-			return
-
-		elif message.content == "commode stop":
-			quit()
-
-		else:
-			channel = bot.get_channel(809274410049339452)
-			await channel.send(f"Сообщение от {message.author.name}:\n**```\n{message.content}\n```**")
-			await bot.process_commands(message)
-
-@bot.command()
-async def commode(ctx):
-		await ctx.send("Done")
-		commodestart()
 
 # Print
 @bot.command()
@@ -285,7 +322,7 @@ async def setstats(ctx, *, stats: str):
 	activity = discord.Game(name=stats, type=3)
 	await bot.change_presence(status=discord.Status.online, activity=activity)
 	await ctx.message.add_reaction('✅')
-	await asyncio.sleep(100)
+	await asyncio.sleep(120)
 	activity = discord.Game(name="!help", type=3)
 	await bot.change_presence(status=discord.Status.online, activity=activity)
 
@@ -295,4 +332,4 @@ async def hello(ctx):
 	await ctx.send(f'{ctx.message.author.mention}, Привет!')
 
 
-bot.run('token')
+bot.run('')
