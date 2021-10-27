@@ -104,6 +104,69 @@ async def on_raw_reaction_add(payload):
 			await member.add_roles(getrole)
 
 
+	else:
+		if payload.emoji.name == "🍪":
+			with open('bot_constants.json','r', encoding='utf-8') as f:
+				const = json.load(f)
+
+			cookies = const["cookies"]
+
+			if not member.name in cookies:
+				mcookies = 0
+				const["cookies"] = {f'{member.name}': 1}
+				channel = bot.get_channel(payload.channel_id)
+				message = await channel.fetch_message(message_id)
+
+				await message.add_reaction('1️⃣')
+
+
+			else:
+				mcookies = 0
+				for i in cookies.items():
+					if member.name == i[0]:
+						mcookies = i[1]
+
+				tc = mcookies + 1
+
+				const["cookies"] = {f'{member.name}': tc}
+
+				channel = bot.get_channel(payload.channel_id)
+				message = await channel.fetch_message(message_id)
+
+				if tc == 2:
+					await message.add_reaction('2️⃣')
+
+				elif tc == 3:
+					await message.add_reaction('3️⃣')
+
+				elif tc == 4:
+					await message.add_reaction('4️⃣')
+
+				elif tc == 5:
+					await message.add_reaction('5️⃣')
+
+				elif tc == 6:
+					await message.add_reaction('6️⃣')
+
+				elif tc == 7:
+					await message.add_reaction('7️⃣')
+
+				elif tc == 8:
+					await message.add_reaction('8️⃣')
+
+				elif tc == 9:
+					await message.add_reaction('9️⃣')
+
+				elif tc == 10:
+					await message.add_reaction('1️⃣0️⃣')
+
+				elif tc >= 10:
+					await message.add_reaction('1️⃣0️⃣➕')
+
+			with open('bot_constants.json','w') as f:
+				json.dump(const,f)
+
+
 
 # METHODS
 
