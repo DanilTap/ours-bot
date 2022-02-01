@@ -10,6 +10,7 @@ intents = discord.Intents.default()
 intents.members = True
 bot = discord.ext.commands.Bot(command_prefix = "!", intents = intents)
 
+
 # EVENTS
 # Start
 @bot.event
@@ -25,7 +26,7 @@ async def on_member_join(member):
 	channel = bot.get_channel(898104718293884988)
 	await channel.send(f'**{member.mention}, Добро пожаловать на сервер Programming | PySider | RU! :wave:**\nРекомендуем ознакомиться с основной информацией о сервере в канале <#898105144372244501>, а также с правилами сервера - <#779376759065411624>.\n\n<@677453905227022349>')
 
-# Buy
+# Exit users
 @bot.event
 async def on_member_remove(member):
 	channel = bot.get_channel(898104747322642472)
@@ -38,6 +39,8 @@ async def on_raw_reaction_add(payload):
 	member_id = payload.user_id
 	member = guild.get_member(member_id)
 	message_id = payload.message_id
+	channel_id = payload.channel_id
+	channel = bot.get_channel(channel_id)
 
 	if payload.user_id == bot.user.id:
 		return
@@ -104,16 +107,19 @@ async def on_raw_reaction_add(payload):
 			await member.add_roles(getrole)
 
 
+	# Cookies
 	else:
 		if payload.emoji.name == "🍪":
+			amessage = await channel.fetch_message(message_id)
+			message_author = amessage.author
 			with open('bot_constants.json','r', encoding='utf-8') as f:
 				const = json.load(f)
 
 			cookies = const["cookies"]
 
-			if not member.name in cookies:
+			if not message_author.name in cookies:
 				mcookies = 0
-				const["cookies"] = {f'{member.name}': 1}
+				const["cookies"][str(message_author.name)] = 1
 				channel = bot.get_channel(payload.channel_id)
 				message = await channel.fetch_message(message_id)
 
@@ -121,17 +127,11 @@ async def on_raw_reaction_add(payload):
 
 
 			else:
-				mcookies = 0
-				for i in cookies.items():
-					if member.name == i[0]:
-						mcookies = i[1]
-
-				tc = mcookies + 1
-
-				const["cookies"] = {f'{member.name}': tc}
-
 				channel = bot.get_channel(payload.channel_id)
 				message = await channel.fetch_message(message_id)
+
+				const["cookies"][str(message_author.name)] += 1
+				tc = const["cookies"][str(message_author.name)]
 
 				if tc == 2:
 					await message.add_reaction('2️⃣')
@@ -168,10 +168,6 @@ async def on_raw_reaction_add(payload):
 
 
 
-# METHODS
-
-
-
 
 # COMMANDS
 # Information
@@ -180,7 +176,7 @@ bot.remove_command('help')
 @bot.command()
 async def help(ctx, command=None):
 	if command == None:
-		embed = discord.Embed(title = 'Мои команды:', color = 0x326cfc, description = "\n**Информация**\n`!help` `!info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`!embedc` `!randid` `!randnum` `!setstats`\n`!print` `!hello`\n\n*Секретные: `1`*")
+		embed = discord.Embed(title = 'Мои команды:', color = 0x326cfc, description = "\n**Информация**\n`!help` `!info`\n\n**Модерация**\n`!ban` `!unban` `!kick` `!mute` `!unmute`\n`!sendmember` `!sendchannel`\n\n**Прочие**\n`!embedc` `!randid` `!randnum` `!setstats`\n`!print` `!hello` `!get_role` `!array`\n\n*Секретные: `1`*")
 		embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/809274410049339452/816321656238768219/Screenshot_4.png")
 		embed.set_footer(text="17 команд | Подробнее о командах - !help <команда>")
 		await ctx.send(embed = embed)
@@ -236,6 +232,9 @@ async def help(ctx, command=None):
 		elif command == "array" or command == "!array":
 			embed = discord.Embed(title = '!array <Действие> || <Параметры>', color = 0x326cfc, description = "Работа с пользовательским массивом.\n\n**Аргументы**\nКоманда без аргументов выводит весь массив\n`add` - Добавляет элемент в массив.\n`pop <индекс>` - Удаление элемента с индексом n\n`clear` - Очистка массива.\n`max` - Сортировка массива по длинне или размеру числа.")
 
+		elif command == "get_role" or command == "!get_role":
+			embed = discord.Embed(title = '!get_role <Роль>', color = 0x326cfc, description = "Создание персональной роли по определенному ЯП/библиотеки/фреймворка, доступна только в канале #роли.")
+
 		else:
 			embed = "Команда не была найдена."
 
@@ -254,51 +253,75 @@ async def info(ctx):
 # Ban
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def ban(ctx, member: discord.Member, *, about: str):
-	await member.ban()
-	await ctx.message.add_reaction('✅')
+async def ban(ctx, member: discord.Member = None, *, about: str = None):
+	if member != None or about != None:
+		await member.ban()
+		await ctx.message.add_reaction('✅')
+
+	else:
+		await ctx.send("Отсутствуют аргументы команды: `!ban <Участник> <Причина>`")
+
 
 # Unban
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def unban(ctx, member: discord.Member, *, about: str):
-	await member.unban()
-	await ctx.message.add_reaction('✅')
+async def unban(ctx, member: discord.Member = None):
+	if member != None:
+		await member.unban()
+		await ctx.message.add_reaction('✅')
+
+	else:
+		await ctx.send("Отсутствуют аргументы команды: `!unban <Участник>`")
+
 
 # Kick
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def kick(ctx, member: discord.Member, *, about: str):
-	await member.kick()
-	await ctx.message.add_reaction('✅')
+async def kick(ctx, member: discord.Member = None, *, about: str = None):
+	if member != None or about != None:
+		await member.kick()
+		await ctx.message.add_reaction('✅')
+
+	else:
+		await ctx.send("Отсутствуют аргументы команды: `!kick <Участник> <Причина>`")
+
 
 # Mute
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def mute(ctx, member: discord.Member, time: int, *, about: str):
-	getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
-	await member.add_roles(getrole)
-	await ctx.message.add_reaction('✅')
-	await asyncio.sleep(time*60)
-	await member.remove_roles(getrole)
-	embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был размьючен спустя {time} минут')
-	await ctx.send(embed = embed)
+async def mute(ctx, member: discord.Member = None, time: int = None, *, about: str = None):
+	if member != None or about != None or time != None:
+		getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
+		await member.add_roles(getrole)
+		await ctx.message.add_reaction('✅')
+		await asyncio.sleep(time*60)
+		await member.remove_roles(getrole)
+		embed = discord.Embed(color = 0x326cfc, description = f'Участник **{member.name}** был размьючен спустя {time} минут')
+		await ctx.send(embed = embed)
+
+	else:
+		await ctx.send("Отсутствуют аргументы команды: `!mute <Участник> <Время> <Причина>`")
 
 # Unmute
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
-async def unmute(ctx, member: discord.Member):
-	getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
-	await member.remove_roles(getrole)
-	await ctx.message.add_reaction('✅')
+async def unmute(ctx, member: discord.Member = None):
+	if member != None:
+		getrole = discord.utils.get(ctx.guild.roles, id = 808691502191738891)
+		await member.remove_roles(getrole)
+		await ctx.message.add_reaction('✅')
+
+	else:
+		await ctx.send("Отсутствуют аргументы команды: `!unmute <Участник>`")
 
 
 # Member send
 @bot.command()
 @commands.has_any_role(782860394297294858, 782860246321856534, 782860339342737408)
 async def sendmember(ctx, member: discord.Member, *, text):
-	await member.send()
+	await member.send(text)
 	await ctx.message.add_reaction('✅')
+
 
 # Channel send
 @bot.command()
@@ -322,7 +345,7 @@ async def get_role(ctx, *, name):
 		await ctx.channel.purge(limit=1)
 
 	else:
-		await ctx.send('Эту команду можно использовать только <#782905071473393694>')
+		await ctx.send('Эту команду можно использовать только в <#782905071473393694>')
 
 @bot.command()
 async def array(ctx, command = None, *, parametr = None):
@@ -347,7 +370,7 @@ async def array(ctx, command = None, *, parametr = None):
 		await ctx.message.add_reaction('✅')
 
 	else:
-		await ctx.send(f'Указан неверный параметр, спотрите `!help array`')
+		await ctx.send(f'Указан неверный параметр, смотрите `!help array`')
 
 	with open('bot_constants.json','w') as f:
 		json.dump(const,f)
@@ -359,11 +382,13 @@ async def print(ctx, *, text):
 	await ctx.channel.purge(limit=1)
 	await ctx.send(f'{text}')
 
+
 # Randid
 @bot.command()
 async def randid(ctx):
 	embed = discord.Embed(color = 0x326cfc, description = f"{uuid.uuid4()}")
 	await ctx.send(embed = embed)
+
 
 # Randnum
 @bot.command()
@@ -372,12 +397,18 @@ async def randnum(ctx, numone: int, numtwo: int):
 	embed = discord.Embed(color = 0x326cfc, description = f"{randnumber}")
 	await ctx.send(embed = embed)
 
+
 # Embedc
 @bot.command()
-async def embedc(ctx, color: discord.Colour, title, *, des):
-	await ctx.send(f'Код:\n```python\nembed = discord.Embed(title = "{title}", color = {color}, description = f"{des}")\nawait ctx.send(embed = embed)\n```')
-	embed = discord.Embed(title = f'{title}', color = color, description = f"{des}")
-	await ctx.send(embed = embed)
+async def embedc(ctx, color: discord.Colour = None, title = None, *, des = None):
+	if color != None or title != None or des != None:
+			await ctx.send(f'Код:\n```python\nembed = discord.Embed(title = "{title}", color = {color}, description = f"{des}")\nawait ctx.send(embed = embed)\n```')
+			embed = discord.Embed(title = f'{title}', color = color, description = f"{des}")
+			await ctx.send(embed = embed)
+
+	else:
+		await ctx.send("Аргументы команды отсутствуют или неверны: `!embedc <Цвет HEX> <Заголовок> <Содержимое>`")
+
 
 # Set stats
 @bot.command()
@@ -389,10 +420,88 @@ async def setstats(ctx, *, stats: str):
 	activity = discord.Game(name="!help", type=3)
 	await bot.change_presence(status=discord.Status.online, activity=activity)
 
+
 # Hello
 @bot.command()
 async def hello(ctx):
 	await ctx.send(f'{ctx.message.author.mention}, Привет!')
 
 
-bot.run('')
+@bot.command()
+async def fight(ctx):
+	embed = discord.Embed(color = 0x326cfc, title="Великое противостояние Кабачка и Баклажана", description = f"**Состоится легендарное сражение Кабачка против Баклажана.**\n\n**__Действующие лица:__**\n**Кабачок** - <@759372651092377620>\n**Баклажан** - <@818207411751878752>.\n\n**・ **Время поединка: __7 дней__\n**・ **Дата окончания: __31 Января 12:00Д Мск.__\n**・ **Лимит запросов: __15сек__.\n**・ **Локация: __#💬-чат__\n**Соперник с наибольшим количеством доставленного противнику урона выигрывает.\nЭтот поединок наконец определит, какой один овощ будет относиться к серверу.**\n\n**__Команды__**:\n**`!s_hit`** - Удар (7-15ед)\n**`!s_tats`** - Статистика поединка.\n\n**Да начнётся битва!**")
+	await ctx.send(embed = embed)
+
+
+@bot.command()
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def s_hit(ctx):
+	if ctx.channel.id == 877197158208651284:
+
+		if ctx.message.author.id == 759372651092377620:# Lesha
+			hit = random.randrange(7, 15)
+			total_hits = 0
+			total_number = 0
+
+			with open('bot_constants.json','r', encoding='utf-8') as f:
+				const = json.load(f)
+
+			total_hits = const["lesha_hits"]
+			total_hits += hit
+			total_number = const["ln"]
+			total_number += 1
+
+			const["lesha_hits"] += hit
+			const["ln"] += 1
+			with open('bot_constants.json','w') as f:
+				json.dump(const,f)
+
+			embed = discord.Embed(color = 0x326cfc, title=f'Атака Кабочка #{total_number}', description = f'** + `{hit}` урона.\n\nОбщий счет: `{total_hits}`**')
+			await ctx.send(embed = embed)
+
+
+		elif ctx.message.author.id == 818207411751878752:# Fasrode
+			hit = random.randrange(7, 15)
+			total_hits = 0
+			total_number = 0
+
+			with open('bot_constants.json','r', encoding='utf-8') as f:
+				const = json.load(f)
+
+			total_hits = const["fasrode_hits"]
+			total_hits += hit
+			total_number = const["fn"]
+			total_number += 1
+
+			const["fasrode_hits"] += hit
+			const["fn"] += 1
+			with open('bot_constants.json','w') as f:
+				json.dump(const,f)
+
+			embed = discord.Embed(color = 0x326cfc, title=f'Атака Баклажана #{total_number}', description = f'** + `{hit}` урона.\n\nОбщий счет: `{total_hits}`**')
+			await ctx.send(embed = embed)
+
+
+
+		else:
+			await ctx.message.add_reaction("❌")
+
+	else:
+		await ctx.message.add_reaction("❌")
+
+
+@bot.command()
+async def s_tats(ctx):
+	with open('bot_constants.json','r', encoding='utf-8') as f:
+		const = json.load(f)
+
+	l_total_hits = const["lesha_hits"]
+	f_total_hits = const["fasrode_hits"]
+	l_num = const["ln"]
+	f_num = const["fn"]
+
+	embed = discord.Embed(color = 0x326cfc, title=f'Статистика', description = f'**Кабачок:**\n・ Общий урон: `{l_total_hits}`\n・ Атаки: `{l_num}`.\n\n**Баклажан:**\n・ Общий урон: `{f_total_hits}`\n・ Атаки: `{f_num}`.')
+	await ctx.send(embed = embed)
+
+
+bot.run('token')
