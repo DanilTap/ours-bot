@@ -623,4 +623,4 @@ async def hello(ctx):
 	await ctx.send(f'{ctx.message.author.mention}, Привет!')
 
 
-bot.run('Nzc0NjQ2MTg3NDQwODY1Mjkw.X6azew.zFUsRgOX7cDo4F0XseENrP45QI4')
+bot.run('tocken')
