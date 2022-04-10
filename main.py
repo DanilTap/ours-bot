@@ -378,11 +378,11 @@ async def codin(ctx):
 		with open('codinsc.json','w') as f:
 			json.dump(codin_json,f)
 
-		embed = discord.Embed(color = 0x326cfc, title = "Валютный курс", description = f"**Курс Codin:**\n```{codin} монет```\nИзменения в курсе: {action}`{edited}%`\n\n**• История курса**\nИстория изменений курса: `{codin_list}`\nНачальная цена Codin: `{codin_list[0]} монет`\n\n**• Команды трансфера**\n`!codin_buy <количество | all>` - Перевести монеты в codin\n`!codin_sell <количество | all>` - Перевести codin в монеты\n\n*Для получения подробной информации о валютной системе используйте команду `!codin_info`.*")
+		embed = discord.Embed(color = 0x326cfc, title = "Валютный курс", description = f"**Курс Codin:**\n```{codin} монет```\nИзменения в курсе: {action}`{round(edited, 2)}%`\n\n**• История курса**\nИстория изменений курса: `{codin_list}`\nНачальная цена Codin: `{codin_list[0]} монет`\n\n**• Команды трансфера**\n`!codin_buy <количество | all>` - Перевести монеты в codin\n`!codin_sell <количество | all>` - Перевести codin в монеты\n`!codin_bal` - Пользовательский баланс\n\n*Для получения подробной информации о валютной системе используйте команду `!codin_info`.*")
 		await ctx.send(embed = embed)
 
 	elif member_name in codin_json:
-		embed = discord.Embed(color = 0x326cfc, title = "Валютный курс", description = f"**Курс Codin:**\n```{codin} монет```\nИзменения в курсе: {action}`{edited}%`\n\n**• История курса**\nИстория изменений курса: `{codin_list}`\nНачальная цена Codin: `{codin_list[0]} монет`\n\n**• Команды трансфера**\n`!codin_buy <количество | all>` - Перевести монеты в codin\n`!codin_sell <количество | all>` - Перевести codin в монеты\n\n*Для получения подробной информации о валютной системе используйте команду `!codin_info`.*")
+		embed = discord.Embed(color = 0x326cfc, title = "Валютный курс", description = f"**Курс Codin:**\n```{codin} монет```\nИзменения в курсе: {action}`{round(edited, 2)}%`\n\n**• История курса**\nИстория изменений курса: `{codin_list}`\nНачальная цена Codin: `{codin_list[0]} монет`\n\n**• Команды трансфера**\n`!codin_buy <количество | all>` - Перевести монеты в codin\n`!codin_sell <количество | all>` - Перевести codin в монеты\n`!codin_bal` - Пользовательский баланс\n\n*Для получения подробной информации о валютной системе используйте команду `!codin_info`.*")
 		await ctx.send(embed = embed)
 
 
@@ -423,112 +423,234 @@ async def codin_bal(ctx):
 
 # Buy
 @bot.command()
-async def codin_buy(ctx, amount: int):
+async def codin_buy(ctx, amount):
 	with open('codinsc.json','r', encoding='utf-8') as f:
 		codin_json = json.load(f)
 
-	if not ctx.message.author.name in codin_json:
-		codins = codin_json['codin']
+	if amount == "all":
+		if not ctx.message.author.name in codin_json:
+			codins = codin_json['codin']
 
-		if amount > round(100 / codins):
-			await ctx.send(f'У вас недостаточно монет для покупки {amount} кодинов.')
+			amoney = 100 / codins # 100 / 40 = 2,5 - Количество кодинов
+			tcodin = round(amoney) # Целое количество кодинов
+			tmoney = tcodin * codins # Цена кодинов
+			ttmoney = 100 - tmoney # Исходный баланс
 
-		elif amount <= round(100 / codins):
-			amoney = amount * codins
-			tmoney = 100 - amoney
+			if amoney < 1:
+				await ctx.send("Недостаточно монет для покупки кодинов")
 
-			codin_json[ctx.message.author.name] = {}
-			codin_json[ctx.message.author.name]['codin'] = amount
-			codin_json[ctx.message.author.name]['money'] = tmoney
-			with open('codinsc.json','w') as f:
-				json.dump(codin_json,f)
+			elif amoney >= 1:
+				codin_json[ctx.message.author.name] = {}
+				codin_json[ctx.message.author.name]['codin'] = tcodin
+				codin_json[ctx.message.author.name]['money'] = ttmoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
 
-			embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
-			embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
-			embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
-			await ctx.send(embed = embed)
+				embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{ttmoney}```', inline = True)
+				await ctx.send(embed = embed)
 
-	elif ctx.message.author.name in codin_json:
-		codins = codin_json['codin']
-		umoney = codin_json[ctx.message.author.name]['money']
-		
-		if amount > round(umoney / codins):
-			await ctx.send(f'У вас недостаточно монет для покупки {amount} кодинов.')
+		elif ctx.message.author.name in codin_json:
+			umoney = codin_json[ctx.message.author.name]['money']
+			codins = codin_json['codin']
 
-		elif amount <= round(umoney / codins):
-			amoney = amount * codins
+			amoney = umoney / codins # umoney / 40 = 2,5 - Количество кодинов
+			tcodin = round(amoney) # Целое количество кодинов
+			tmoney = tcodin * codins # Цена кодинов
+			ttmoney = umoney - tmoney # Исходный баланс
 
-			codin_json[ctx.message.author.name]['codin'] += amount
-			codin_json[ctx.message.author.name]['money'] -= amoney
-			with open('codinsc.json','w') as f:
-				json.dump(codin_json,f)
+			if amoney < 1:
+				await ctx.send("Недостаточно монет для покупки кодинов")
 
-			with open('codinsc.json','r', encoding='utf-8') as f:
-				codin_json = json.load(f)
+			elif amoney >= 1:
+				codin_json[ctx.message.author.name]['codin'] += tcodin
+				codin_json[ctx.message.author.name]['money'] = ttmoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
 
-			tcodin = codin_json[ctx.message.author.name]['codin']
-			tmomey = codin_json[ctx.message.author.name]['money']
+				embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{ttmoney}```', inline = True)
+				await ctx.send(embed = embed)
 
-			embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
-			embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
-			embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
-			await ctx.send(embed = embed)
+	elif int(amount) < 1:
+		await ctx.send("Нельзя купить меньше 1 Кодина")
+
+	elif int(amount) >= 1:
+		amount = int(amount)
+		if not ctx.message.author.name in codin_json:
+			codins = codin_json['codin']
+
+			if amount > round(100 / codins):
+				await ctx.send(f'У вас недостаточно монет для покупки {amount} кодинов.')
+
+			elif amount <= round(100 / codins):
+				amoney = amount * codins
+				tmoney = 100 - amoney
+
+				codin_json[ctx.message.author.name] = {}
+				codin_json[ctx.message.author.name]['codin'] = amount
+				codin_json[ctx.message.author.name]['money'] = tmoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
+
+				embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
+				await ctx.send(embed = embed)
+
+		elif ctx.message.author.name in codin_json:
+			codins = codin_json['codin']
+			umoney = codin_json[ctx.message.author.name]['money']
+			
+			if amount > round(umoney / codins):
+				await ctx.send(f'У вас недостаточно монет для покупки {amount} кодинов.')
+
+			elif amount <= round(umoney / codins):
+				amoney = amount * codins
+
+				codin_json[ctx.message.author.name]['codin'] += amount
+				codin_json[ctx.message.author.name]['money'] -= amoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
+
+				with open('codinsc.json','r', encoding='utf-8') as f:
+					codin_json = json.load(f)
+
+				tcodin = codin_json[ctx.message.author.name]['codin']
+				tmomey = codin_json[ctx.message.author.name]['money']
+
+				embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
+				await ctx.send(embed = embed)
+
+	else:
+		await ctx.send("Ошибка в аргументах команды")
 
 
 # Sell
 @bot.command()
-async def codin_sell(ctx, amount: int):
+async def codin_sell(ctx, amount):
 	with open('codinsc.json','r', encoding='utf-8') as f:
 		codin_json = json.load(f)
 
-	if not ctx.message.author.name in codin_json:
-		await ctx.send(f'У вас недостаточно кодинов для продажи {amount} кодинов.')
+	if amount == "all":
+		if not ctx.message.author.name in codin_json:
+			await ctx.send("Недостаточно кодинов для покупки монет")
 
-	elif ctx.message.author.name in codin_json:
-		codins = codin_json['codin']
-		ucodin = codin_json[ctx.message.author.name]['codin']
-		
-		if amount > ucodin:
-			await ctx.send(f'У вас недостаточно кодинов для продажи {amount} кодинов.')
+		elif ctx.message.author.name in codin_json:
+			codins = codin_json['codin']
+			ucodin = codin_json[ctx.message.author.name]['codin']
+			umoney = codin_json[ctx.message.author.name]['money']
 
-		elif amount <= ucodin:
-			amoney = amount * codins
+			tmoney = ucodin * codins # Цена всех кодинов
 
-			codin_json[ctx.message.author.name]['codin'] -= amount
-			codin_json[ctx.message.author.name]['money'] += amoney
-			with open('codinsc.json','w') as f:
-				json.dump(codin_json,f)
+			if ucodin < 1:
+				await ctx.send("Недостаточно кодинов для покупки монет")
 
-			with open('codinsc.json','r', encoding='utf-8') as f:
-				codin_json = json.load(f)
+			elif ucodin >= 1:
+				codin_json[ctx.message.author.name]['codin'] -= ucodin
+				codin_json[ctx.message.author.name]['money'] += tmoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
 
-			tcodin = codin_json[ctx.message.author.name]['codin']
-			tmomey = codin_json[ctx.message.author.name]['money']
+				with open('codinsc.json','r', encoding='utf-8') as f:
+					codin_json = json.load(f)
 
-			embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно проданы")
-			embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
-			embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
-			await ctx.send(embed = embed)
+				tcodin = codin_json[ctx.message.author.name]['codin']
+				ttmoney = codin_json[ctx.message.author.name]['money']
+
+				embed = discord.Embed(color = 0x326cfc, title = "Монеты успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{ttmoney}```', inline = True)
+				await ctx.send(embed = embed)
+
+	elif int(amount) < 1:
+		await ctx.send("Нельзя купить меньше 1 Кодина")
+
+	elif int(amount) >= 1:
+		amount = int(amount)
+
+		if not ctx.message.author.name in codin_json:
+			await ctx.send(f'У вас недостаточно кодинов для покупки {amount} монет.')
+
+		elif ctx.message.author.name in codin_json:
+			codins = codin_json['codin']
+			ucodin = codin_json[ctx.message.author.name]['codin']
+			umoney = codin_json[ctx.message.author.name]['money']
+			
+			if amount > ucodin:
+				await ctx.send(f'У вас недостаточно кодинов для покупки {amount} монет.')
+
+			elif amount <= ucodin:
+				amoney = amount * codins # Цена amount кодинов
+
+				codin_json[ctx.message.author.name]['codin'] -= amount
+				codin_json[ctx.message.author.name]['money'] += amoney
+				with open('codinsc.json','w') as f:
+					json.dump(codin_json,f)
+
+				with open('codinsc.json','r', encoding='utf-8') as f:
+					codin_json = json.load(f)
+
+				tcodin = codin_json[ctx.message.author.name]['codin']
+				tmomey = codin_json[ctx.message.author.name]['money']
+
+				embed = discord.Embed(color = 0x326cfc, title = "Кодины успешно куплены")
+				embed.add_field(name = '**Кодины**', value = f'```{tcodin}```', inline = True)
+				embed.add_field(name = '**Монеты**', value = f'```{tmomey}```', inline = True)
+				await ctx.send(embed = embed)
+
+	else:
+		await ctx.send("Ошибка в аргументах команды")
 
 
 # Edit
 @bot.command()
 async def codin_edit(ctx, price: int):
-	with open('codinsc.json','r', encoding='utf-8') as f:
-		codin_json = json.load(f)
+	if ctx.message.author.id == 677453905227022349:
+		with open('codinsc.json','r', encoding='utf-8') as f:
+			codin_json = json.load(f)
 
-	codinb = codin_json['codin']
-	codin_json['codin-before'] = codin_json['codin']
-	codin_json['codin'] = price
-	codin_json['codin-history'].append(price)
-	with open('codinsc.json','w') as f:
-		json.dump(codin_json,f)
+		codinb = codin_json['codin']
+		codin_json['codin-before'] = codin_json['codin']
+		codin_json['codin'] = price
+		codin_json['codin-history'].append(price)
+		with open('codinsc.json','w') as f:
+			json.dump(codin_json,f)
 
-	await ctx.send(f'**`{price}` `{codinb}`**')
+		await ctx.send(f'**`{price}` `{codinb}`**')
+
+	else:
+		await ctx.send("Вам недоступна эта команда")
 
 
 
 # Other
+@bot.command()
+async def db(ctx):
+	guild = bot.get_guild(880008097370865706)
+	if ctx.message.guild == guild:
+		print('In guild')
+
+	else:
+		with open('bot_constants.json','r', encoding='utf-8') as f:
+			const = json.load(f)
+
+		print("bot_constants.json Done")
+
+		with open('codinsc.json','r', encoding='utf-8') as f:
+			codins = json.load(f)
+
+		print("codinsc.json Done")
+
+		with open('db.txt','w+', encoding='utf-8') as f:
+			f.write(f'bot_constants.json:\n{const}\n\n\ncodinsc.json:\n{codins}')
+
+		await ctx.send(file=discord.File(r'db.txt'))
+
 # Create role
 @bot.command()
 async def get_role(ctx, *, name):
@@ -623,4 +745,4 @@ async def hello(ctx):
 	await ctx.send(f'{ctx.message.author.mention}, Привет!')
 
 
-bot.run('tocken')
+bot.run('token')
