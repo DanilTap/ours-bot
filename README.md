@@ -1,7 +1,3 @@
 # Ours Bot
 ## About
-This Discord bot was created for the programming community **Programming | PySider | RU**, so it has some useful commands for programming.
-
-You can use some of the code for yourself.
-
-For questions contact me HTTPs#3112 in Discord.
+This Discord bot was created for the programming community **PySider**, so it has some useful commands for programming.
